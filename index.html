@@ -57,7 +57,7 @@
                 .filter(d => config.targetTowns.includes(d.town))
                 .map(d => ({
                     town: d.town,
-                    month: new Date(d.month + "-01"), // Ensure full date format
+                    month: new Date(d.month), // Ensure full date format
                     price: +d.resale_price
                 }));
         }

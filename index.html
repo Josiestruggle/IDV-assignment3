@@ -22,7 +22,7 @@
     <div id="chart"></div>
     <script>
         // D3 code here
-        d3.csv("jurong_west_avg.csv").then(data => {
+        d3.csv("data/processed/jurong_west_avg.csv").then(data => {
     data.forEach(d => {
         d.month = new Date(d.month);
         d.resale_price = +d.resale_price;

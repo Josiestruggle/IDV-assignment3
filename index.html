@@ -147,10 +147,14 @@
                 .style("opacity", 0);
 
             // Add interactive dots
-            svg.selectAll(".dot-group")
-                .data(dataByTown)
+            // Append a group for each town
+            const dotGroups = svg.selectAll(".dot-group")
+                .data(Array.from(dataByTown))  // Convert the Map to an array if needed
                 .enter()
-                .selectAll(".dot")
+                .append("g")
+                .attr("class", "dot-group");
+                // For each group, create the dots
+            dotGroups.selectAll(".dot")
                 .data(([town, values]) => values.map(d => ({ town, ...d })))
                 .enter()
                 .append("circle")

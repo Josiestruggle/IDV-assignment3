@@ -158,9 +158,10 @@
                 .style("opacity", 0);
 
             // Add interactive dots
-            svg.selectAll(".dot")
-                .data(data)
-                .enter().append("circle")
+            svg.selectAll(".dot-group")
+                .data(dataByTown)
+                .enter()
+                .append("circle")
                 .attr("class", "dot")
                 .attr("cx", d => x(d.month))
                 .attr("cy", d => y(d.resale_price))

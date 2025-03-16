@@ -111,7 +111,11 @@
             // Add axes
             svg.append("g")
                 .attr("transform", `translate(0,${yScale.range()[0]})`)
-                .call(d3.axisBottom(xScale).ticks(d3.timeYear.every(1)));
+                .call(d3.axisBottom(xScale).tickValues(d3.timeYears(
+                    new Date(2020, 0, 1),  // Start date
+                    new Date(2026, 0, 1),  // End date (exclusive)
+                    1                      // Year interval
+                )).tickFormat(d3.timeFormat("%Y")));
 
             svg.append("g")
                 .attr("class", "grid")

@@ -13,6 +13,7 @@
             pointer-events: none;
             font-family: Arial, sans-serif;
             z-index: 1000;
+            pointer-events: none;
         }
         .legend-item {
             cursor: pointer;
@@ -157,7 +158,8 @@
                 .style("font-size", "12px");
 
             // Create tooltip
-            const tooltip = d3.select("body").append("div")
+            const tooltip = d3.select("body")
+                .append("div")
                 .attr("class", "tooltip")
                 .style("opacity", 0);
 
@@ -179,17 +181,20 @@
                 .attr("r", 3)
                 .attr("fill", d => colorScale(d.town))
                 .on("mouseover", (event, d) => {
-                    tooltip.transition().duration(200)
-                        .style("opacity", 0.9)
-                        .style("left", `${event.pageX + 5}px`)
-                        .style("top", `${event.pageY - 28}px`)
-                        .html(`
+                    // set html content
+                    tooltip.html(`
                             <strong>${d.town}</strong><br>
                             ${d3.timeFormat("%b %Y")(d.month)}<br>
                             $${d.price.toLocaleString()}
                         `);
+                    //apply transition style
+                    tooltip.transition()
+                        .duration(200)
+                        .style("opacity", 0.9)
+                        .style("left", `${event.pageX + 5}px`)
+                        .style("top", `${event.pageY - 28}px`)
                 })
-                .on("mouseout", () => tooltip.style("opacity", 0));
+                .on("mouseout", () => tooltip.transition().duration(200).style("opacity", 0));
         }
     </script>
 </body>

@@ -87,6 +87,7 @@
 
             const yScale = d3.scaleLinear()
                 .domain([0, d3.max(allPrices)])
+                .nice()  // This adjusts the max to a round number
                 .range([config.height - config.margin.top - config.margin.bottom, 0]);
 
             // Create color scale
@@ -131,7 +132,6 @@
 
             svg.append("g")
                 .call(d3.axisLeft(yScale)
-                .ticks(12)
                 .tickFormat(d => `$${d/1000}k`));
             
             // Create legend

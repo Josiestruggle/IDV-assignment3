@@ -113,13 +113,14 @@
                 .attr("transform", `translate(0,${yScale.range()[0]})`)
                 .call(d3.axisBottom(xScale).ticks(d3.timeYear.every(1)));
 
-                svg.append("g")
+            svg.append("g")
                 .attr("class", "grid")
                 .attr("transform", `translate(0,${yScale.range()[0]})`)
                 .call(d3.axisBottom(xScale)
-                .ticks(d3.timeMonth.every(1))
-                .tickSize(-config.height + config.margin.top + config.margin.bottom)
-                .tickFormat("")
+                    .ticks(d3.timeMonth.every(1))
+                    .tickSize(-config.height + config.margin.top + config.margin.bottom)
+                    .tickFormat(""))
+                .selectAll("line")
                 .style("stroke-opacity", 0.1);
 
             svg.append("g")

@@ -27,8 +27,8 @@
     <div id="legend"></div>
 
     <script>
-          // Configuration settings
-          const config = {
+        // Configuration settings
+        const config = {
             targetTowns: [
                 "JURONG WEST",
                 "BUKIT MERAH", 
@@ -41,7 +41,6 @@
             width: 1000,
             height: 500
         };
-
 
         // Initialize chart
         d3.csv("data/processed/multi_town_avg.csv").then(rawData => {
@@ -71,8 +70,8 @@
             const allPrices = data.map(d => d.price);
             const dateExtent = d3.extent(data, d => d.month);
 
-           // Create SVG container
-           const svg = d3.select("#chart")
+            // Create SVG container
+            const svg = d3.select("#chart")
                 .append("svg")
                 .attr("width", config.width)
                 .attr("height", config.height)
@@ -87,7 +86,7 @@
             const yScale = d3.scaleLinear()
                 .domain([0, d3.max(allPrices)])
                 .range([config.height - config.margin.top - config.margin.bottom, 0]);
-                
+
             // Create color scale
             const colorScale = d3.scaleOrdinal()
                 .domain(config.targetTowns)
@@ -114,14 +113,13 @@
                 .attr("transform", `translate(0,${yScale.range()[0]})`)
                 .call(d3.axisBottom(xScale).ticks(d3.timeYear.every(1)));
 
-            svg.append("g")
+                svg.append("g")
                 .attr("class", "grid")
                 .attr("transform", `translate(0,${yScale.range()[0]})`)
                 .call(d3.axisBottom(xScale)
                 .ticks(d3.timeMonth.every(1))
                 .tickSize(-config.height + config.margin.top + config.margin.bottom)
-                .tickFormat(""))
-                .selectAll("line")
+                .tickFormat("")
                 .style("stroke-opacity", 0.1);
 
             svg.append("g")
@@ -158,10 +156,14 @@
                 .style("opacity", 0);
 
             // Add interactive dots
-            svg.selectAll(".dot-group")
-                .data(dataByTown)
+            // Append a group for each town
+            const dotGroups = svg.selectAll(".dot-group")
+                .data(Array.from(dataByTown))  // Convert the Map to an array if needed
                 .enter()
-                .selectAll(".dot")
+                .append("g")
+                .attr("class", "dot-group");
+                // For each group, create the dots
+            dotGroups.selectAll(".dot")
                 .data(([town, values]) => values.map(d => ({ town, ...d })))
                 .enter()
                 .append("circle")

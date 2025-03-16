@@ -23,7 +23,7 @@
 <body>
     <div id="writeup">
         <h2>HDB Resale Price Trends (2020-2025)</h2>
-        <p>Comparing average monthly resale prices across multiple towns.</p>
+        <p>Comparing average monthly resale prices across multiple towns (West, east, north, south and central area) in Singapore.</p>
     </div>
     <div id="chart"></div>
     <div id="legend"></div>
@@ -131,7 +131,7 @@
 
             svg.append("g")
                 .call(d3.axisLeft(yScale)
-                .ticks(11)
+                .ticks(12)
                 .tickFormat(d => `$${d/1000}k`));
             
             // Create legend

@@ -37,9 +37,9 @@
                 "WOODLANDS"
             ],
             colors: d3.schemeCategory10,
-            margin: { top: 20, right: 80, bottom: 50, left: 60 },
-            width: 1000,
-            height: 500
+            const margin = { top: 40, right: 40, bottom: 60, left: 60 };
+            const width = 800 - margin.left - margin.right;
+            const height = 500 - margin.top - margin.bottom;
         };
 
         // Initialize chart
@@ -73,19 +73,23 @@
             // Create SVG container
             const svg = d3.select("#chart")
                 .append("svg")
-                .attr("width", config.width)
-                .attr("height", config.height)
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
                 .append("g")
-                .attr("transform", `translate(${config.margin.left},${config.margin.top})`);
+                .attr("transform", `translate(${margin.left},${margin.top})`);
 
             // Create scales
             const xScale = d3.scaleTime()
                 .domain(dateExtent)
-                .range([0, config.width - config.margin.left - config.margin.right]);
+                .range([0, config.width - config.margin.left - config.margin.right])
+                .attr("transform", `translate(${width / 2}, ${height + margin.bottom - 10})`);
 
             const yScale = d3.scaleLinear()
                 .domain([0, d3.max(allPrices)])
-                .range([config.height - config.margin.top - config.margin.bottom, 0]);
+                .range([config.height - config.margin.top - config.margin.bottom, 0])
+                .attr("transform", "rotate(-90)")
+                .attr("y", 0 - margin.left + 20)  // Positions left of y-axis
+                .attr("x", 0 - (height / 2));      // Centers vertically
 
             // Create color scale
             const colorScale = d3.scaleOrdinal()
@@ -112,6 +116,16 @@
             svg.append("g")
                 .attr("transform", `translate(0,${yScale.range()[0]})`)
                 .call(d3.axisBottom(xScale).ticks(d3.timeYear.every(1)));
+
+            svg.append("g")
+                .attr("class", "grid")
+                .attr("transform", `translate(0,${yScale.range()[0]})`)
+                .call(d3.axisBottom(xScale)
+                .ticks(d3.timeMonth.every(1))
+                .tickSize(-config.height + config.margin.top + config.margin.bottom)
+                .tickFormat(""))
+                .selectAll("line")
+                .style("stroke-opacity", 0.1);
 
             svg.append("g")
                 .call(d3.axisLeft(yScale).tickFormat(d => `$${d/1000}k`));
@@ -161,7 +175,7 @@
                 .attr("class", "dot")
                 .attr("cx", d => xScale(d.month))
                 .attr("cy", d => yScale(d.price))
-                .attr("r", 3)
+                .attr("r", 5)
                 .attr("fill", d => colorScale(d.town))
                 .on("mouseover", (event, d) => {
                     tooltip.transition().duration(200)

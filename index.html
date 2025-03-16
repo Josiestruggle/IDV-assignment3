@@ -130,13 +130,8 @@
                 .style("stroke-opacity", 0.1);
 
             svg.append("g")
-                .call(d3.axisLeft(yScale)
-                .tickFormat(d => `$${d/1000}k`));
-            const yScale = d3.scaleLinear()
-                .domain([0, d3.max(data, d => d.price)]) // Should include 1.1M
-                .range([height, 0]);
-
-
+                .call(d3.axisLeft(yScale).tickFormat(d => `$${d/1000}k`));
+            
             // Create legend
             const legend = d3.select("#legend")
                 .append("svg")

@@ -6,15 +6,24 @@
     <style>
         .tooltip {
             position: absolute;
-            padding: 8px;
-            background: white;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.95);
             border: 1px solid #ddd;
             border-radius: 4px;
             pointer-events: none;
             font-family: Arial, sans-serif;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            min-width: 160px;
         }
-        .legend-item {
-            cursor: pointer;
+        .grid line {
+            stroke: #eee;
+            shape-rendering: crispEdges;
+        }
+        .axis text {
+            font-size: 12px;
+        }
+        .dot {
+            transition: r 0.2s ease;
         }
     </style>
 </head>
@@ -27,8 +36,8 @@
     <div id="legend"></div>
 
     <script>
-          // Configuration settings
-          const config = {
+        // Configuration settings
+        const config = {
             targetTowns: [
                 "JURONG WEST",
                 "BUKIT MERAH", 
@@ -37,11 +46,10 @@
                 "WOODLANDS"
             ],
             colors: d3.schemeCategory10,
-            margin: { top: 20, right: 80, bottom: 50, left: 60 },
-            width: 1000,
-            height: 500
+            margin: { top: 30, right: 80, bottom: 70, left: 80 },
+            width: 1200,
+            height: 600
         };
-
 
         // Initialize chart
         d3.csv("data/processed/multi_town_avg.csv").then(rawData => {
@@ -53,26 +61,23 @@
         });
 
         function processData(rawData) {
-            // Filter target towns and convert data types
             return rawData
                 .filter(d => config.targetTowns.includes(d.town))
                 .map(d => ({
                     town: d.town,
-                    month: new Date(d.month), // Ensure full date format
+                    month: new Date(d.month + "-01"), // Ensure proper date parsing
                     price: +d.resale_price
                 }));
         }
 
         function createChart(data) {
-            // Group data by town
-            const dataByTown = d3.group(data, d => d.town);
-            
-            // Calculate axis ranges
-            const allPrices = data.map(d => d.price);
-            const dateExtent = d3.extent(data, d => d.month);
+            // Force date range to 2020-2025
+            const dateExtent = [
+                new Date(2020, 0, 1),  // Jan 2020
+                new Date(2025, 3, 1)  // Dec 2025
+            ];
 
-           // Create SVG container
-           const svg = d3.select("#chart")
+            const svg = d3.select("#chart")
                 .append("svg")
                 .attr("width", config.width)
                 .attr("height", config.height)
@@ -85,95 +90,138 @@
                 .range([0, config.width - config.margin.left - config.margin.right]);
 
             const yScale = d3.scaleLinear()
-                .domain([0, d3.max(allPrices)])
+                .domain([0, d3.max(data, d => d.price)])
                 .range([config.height - config.margin.top - config.margin.bottom, 0]);
-                
+
+            // Create axes
+            const xAxis = d3.axisBottom(xScale)
+                .ticks(d3.timeYear.every(1))
+                .tickFormat(d3.timeFormat("%Y"));
+
+            const yAxis = d3.axisLeft(yScale)
+                .ticks(5)
+                .tickFormat(d => `$${d/1000}k`);
+
+            // Add X axis
+            svg.append("g")
+                .attr("transform", `translate(0,${yScale.range()[0]})`)
+                .call(xAxis)
+                .selectAll("text")
+                .style("text-anchor", "middle");
+
+            // Add Y axis
+            svg.append("g")
+                .call(yAxis);
+
+            // Add monthly grid lines
+            svg.append("g")
+                .attr("class", "grid")
+                .attr("transform", `translate(0,${yScale.range()[0]})`)
+                .call(d3.axisBottom(xScale)
+                    .ticks(d3.timeMonth.every(1))
+                    .tickSize(-config.height + config.margin.top + config.margin.bottom)
+                    .tickFormat(""))
+                .selectAll("line")
+                .style("stroke-opacity", 0.1);
+
             // Create color scale
             const colorScale = d3.scaleOrdinal()
                 .domain(config.targetTowns)
                 .range(config.colors);
 
-            // Create line generator
+            // Draw lines
             const lineGenerator = d3.line()
                 .x(d => xScale(d.month))
                 .y(d => yScale(d.price));
 
-            // Draw lines
+            const towns = d3.groups(data, d => d.town);
+            
             svg.selectAll(".line")
-                .data(dataByTown)
+                .data(towns)
                 .enter()
                 .append("path")
                 .attr("class", "line")
-                .attr("d", ([town, values]) => lineGenerator(values))
+                .attr("d", ([, values]) => lineGenerator(values))
                 .attr("stroke", ([town]) => colorScale(town))
                 .attr("fill", "none")
                 .attr("stroke-width", 2);
 
-            // Add axes
-            svg.append("g")
-                .attr("transform", `translate(0,${yScale.range()[0]})`)
-                .call(d3.axisBottom(xScale).ticks(d3.timeYear.every(1)));
+            // Add interactive dots
+            svg.selectAll(".dot")
+                .data(data)
+                .enter()
+                .append("circle")
+                .attr("class", "dot")
+                .attr("cx", d => xScale(d.month))
+                .attr("cy", d => yScale(d.price))
+                .attr("r", 4)
+                .attr("fill", d => colorScale(d.town))
+                .style("opacity", 0.8)
+                .on("mouseover", function(event, d) {
+                    d3.select(this).attr("r", 7);
+                    tooltip.transition()
+                        .duration(200)
+                        .style("opacity", 0.95)
+                        .html(`
+                            <div style="border-bottom: 1px solid #ddd; margin-bottom: 4px; padding-bottom: 4px;">
+                                ${d.town}
+                            </div>
+                            <div>${d3.timeFormat("%B %Y")(d.month)}</div>
+                            <div style="margin-top: 4px; font-weight: bold;">
+                                $${d3.format(",.0f")(d.price)}
+                            </div>
+                        `)
+                        .style("left", `${event.pageX + 15}px`)
+                        .style("top", `${event.pageY - 45}px`);
+                })
+                .on("mouseout", function() {
+                    d3.select(this).attr("r", 4);
+                    tooltip.style("opacity", 0);
+                });
 
-            svg.append("g")
-                .attr("class", "grid")
-                .attr("transform", `translate(0,${yScale.range()[0]})`)
-                .call(d3.axisBottom(xScale)
-                .ticks(d3.timeMonth.every(1))
-                .tickSize(-config.height + config.margin.top + config.margin.bottom)
-                .tickFormat(""))
-                .selectAll("line")
-                .style("stroke-opacity", 0.1);
+            // Add axis labels
+            svg.append("text")
+                .attr("transform", `translate(${(config.width - config.margin.left - config.margin.right)/2},${config.height - config.margin.top + 40})`)
+                .style("text-anchor", "middle")
+                .text("Year");
 
-            svg.append("g")
-                .call(d3.axisLeft(yScale).tickFormat(d => `$${d/1000}k`));
+            svg.append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("y", -config.margin.left + 20)
+                .attr("x", -(config.height - config.margin.top - config.margin.bottom)/2)
+                .style("text-anchor", "middle")
+                .text("Average Price (SGD)");
 
             // Create legend
             const legend = d3.select("#legend")
                 .append("svg")
                 .attr("width", 300)
-                .attr("height", 100);
+                .attr("height", config.targetTowns.length * 22);
 
             legend.selectAll("rect")
                 .data(config.targetTowns)
                 .enter()
                 .append("rect")
                 .attr("x", 0)
-                .attr("y", (d,i) => i * 20)
-                .attr("width", 15)
-                .attr("height", 15)
+                .attr("y", (d,i) => i * 22)
+                .attr("width", 16)
+                .attr("height", 16)
                 .attr("fill", d => colorScale(d));
 
             legend.selectAll("text")
                 .data(config.targetTowns)
                 .enter()
                 .append("text")
-                .attr("x", 20)
-                .attr("y", (d,i) => i * 20 + 12)
+                .attr("x", 24)
+                .attr("y", (d,i) => i * 22 + 12)
                 .text(d => d)
-                .style("font-size", "12px");
+                .style("font-size", "14px")
+                .style("alignment-baseline", "middle");
 
-            // Create tooltip
+            // Initialize tooltip
             const tooltip = d3.select("body").append("div")
                 .attr("class", "tooltip")
                 .style("opacity", 0);
-
-            // Add interactive dots
-            svg.selectAll(".dot-group")
-                .data(dataByTown)
-                .enter()
-                .append("circle")
-                .attr("class", "dot")
-                .attr("cx", d => x(d.month))
-                .attr("cy", d => y(d.resale_price))
-                .attr("r", 4)
-                .attr("fill", "#2c7bb6")
-                .on("mouseover", (event, d) => {
-                    tooltip.transition().duration(200).style("opacity", .9);
-                    tooltip.html(`<strong>${d3.timeFormat("%b %Y")(d.month)}</strong><br/>$${d.resale_price.toLocaleString()}`)
-                        .style("left", `${event.pageX + 5}px`)
-                        .style("top", `${event.pageY - 28}px`);
-                })
-                .on("mouseout", () => tooltip.style("opacity", 0));
         }
     </script>
 </body>

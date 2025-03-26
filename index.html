@@ -22,8 +22,41 @@
 </head>
 <body>
     <div id="writeup">
-        <h2>HDB Resale Price Trends (2020-2025)</h2>
-        <p>Comparing average monthly resale prices across multiple towns (West, east, north, south and central area) in Singapore.</p>
+        <h1>Analyzing Regional HDB Resale Price Trends (2020–2025)</h1>
+        <h3>A Data-Driven Comparison of Singapore’s Housing Market</h3>
+        <h2>Aim</h2>
+        <p>Comparing average monthly resale prices across multiple towns (West, east, north, south and central area) in Singapore from 2020 to 2025</p>
+        <h2>Hypothesis</h2>
+        <p>Despite localized variations, HDB resale prices across Singapore’s major towns exhibited similar growth trajectories from 2020 to 2025, driven by nationwide factors like inflation, interest rates, and housing policies.</p>
+        <h2>Dataset</h2>
+        <p>Extract data for 5 representative towns (Jurong West [West], Tampines [East], Woodlands [North], Bukit Merah [South], Central Area), filter 2020-2025, calcute average resale price per month for each town </p>
+        <p>
+            <a href="https://data.gov.sg/datasets?topics=housing&page=1&resultId=d_8b84c4ee58e3cfc0ece0d773c8ca6abc" target="_blank">
+                View Source: Resale flat prices based on registration date from Jan-2017 onwards</a>
+        </p>
+        <h2>Visualization</h2>
+        <ul>
+            <li>Line Chart: Ideal for showing trends over time.</li>
+            <li>Color Coding: Distinct colors for each region.</li>
+            <li>Interactivity: Tooltips for exact monthly averages in corresponding towns</li>
+        </ul>
+        <h2>Key Findings</h2>
+        <ul>
+            <li>Overall Growth: All towns saw consistent upward trends (e.g., Central Area: +45%, Woodlands: +65%).</li>
+            <li>Periods and Drivers: </li>
+            <ul>
+                <li>
+                    <P>2021–2022: Post-COVID demand surge caused rapid price increases (e.g., Central Area +38% in 2021).</P>
+                </li>
+                <li>
+                    <P>2023–2024: Cooling measures (e.g., 2022 ABSD hikes) led to plateaus and erratic swings.</P>
+                </li>
+                <li>
+                    <P>2024–2025: Projected spikes (e.g., Central Area at $1.09M in Oct 2024) suggest speculative uncertainty.</P>
+                </li>
+            </ul>
+            <li>Regional Differences: Central Area has sharp spikes/dips, with highest volatility. Bukit Merah (South) also regard as central area, shows a quite same high volatility price. Jurong West (West) shows steady, moderate growth. Woodlands (North) has slowest growth, possibly due to supply or location. Tampines (East) shows competitive growth, nearing Central prices in some months.</li>
+        </ul>
     </div>
     <div id="chart"></div>
     <div id="legend"></div>
